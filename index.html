@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CCNA 1 v7.0 - Examen Final ITN (164 Preguntas)</title>
+  <title>CCNA 1 v7.0 - Examen Final ITN</title>
+  
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0b0f19">
@@ -69,8 +70,11 @@
     .q-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
     .q-text { font-size: 1.05rem; font-weight: 600; line-height: 1.5; margin-bottom: 16px; }
     
-    .q-image-container { background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center; overflow-x: auto; }
-    .q-image-container img { max-width: 100%; height: auto; border-radius: 4px; display: block; margin: 0 auto; }
+    .q-image-container { background: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 20px; text-align: center; overflow-x: auto; }
+    .q-image-container img { max-width: 100%; height: auto; border-radius: 6px; display: block; margin: 0 auto; }
+    .q-image-container table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .q-image-container th, .q-image-container td { border: 1px solid var(--border); padding: 8px; text-align: left; }
+    .q-image-container th { background: #1e293b; color: var(--accent); }
 
     .options-list { display: flex; flex-direction: column; gap: 10px; }
     .opt-item { background: #0b0f19; border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: left; color: var(--text-main); font-size: 0.92rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
@@ -91,18 +95,18 @@
   <div id="config-screen">
     <div class="header-badge">Cisco NetAcad • CCNA 1 v7.0 (ITN)</div>
     <h1>Examen Final del Curso</h1>
-    <p class="description">Simulador oficial interactivo con las 164 preguntas e imágenes originales del examen final.</p>
+    <p class="description">Simulador oficial interactivo con las preguntas e ilustraciones de red de la evaluación oficial.</p>
 
     <div class="section-box">
       <div class="section-title"><span>01</span> Sección del cuestionario</div>
       <div class="grid-options">
-        <div class="card-opt selected" onclick="selectSection(this, 'all')">
-          <input type="radio" name="sec" checked>
+        <div class="card-opt selected" id="opt-sec-all" onclick="selectSection('all')">
+          <input type="radio" name="sec" id="rad-sec-all" checked>
           <h3>Banco completo</h3>
-          <p id="banco-count-desc">Cargando preguntas...</p>
+          <p id="banco-count-desc">Cargando...</p>
         </div>
-        <div class="card-opt" onclick="selectSection(this, 'random60')">
-          <input type="radio" name="sec">
+        <div class="card-opt" id="opt-sec-60" onclick="selectSection('random60')">
+          <input type="radio" name="sec" id="rad-sec-60">
           <h3>Simulacro aleatorio</h3>
           <p>60 preguntas al azar</p>
         </div>
@@ -112,13 +116,13 @@
     <div class="section-box">
       <div class="section-title"><span>02</span> Modo de evaluación</div>
       <div class="grid-options">
-        <div class="card-opt selected" onclick="selectMode(this, 'practice')">
-          <input type="radio" name="mode" checked>
+        <div class="card-opt selected" id="opt-mode-prac" onclick="selectMode('practice')">
+          <input type="radio" name="mode" id="rad-mode-prac" checked>
           <h3>Práctica</h3>
           <p>Verifica cada respuesta y lee la explicación al instante.</p>
         </div>
-        <div class="card-opt" onclick="selectMode(this, 'exam')">
-          <input type="radio" name="mode">
+        <div class="card-opt" id="opt-mode-real" onclick="selectMode('exam')">
+          <input type="radio" name="mode" id="rad-mode-real">
           <h3>Realista</h3>
           <p>Sin retroalimentación: las respuestas se guardan hasta finalizar.</p>
         </div>
@@ -193,28 +197,33 @@
   function updateCounters() {
     const total = typeof rawQuestions !== 'undefined' ? rawQuestions.length : 0;
     document.getElementById('banco-count-desc').innerText = `${total} preguntas cargadas`;
-    document.getElementById('sum-qcount').innerText = config.section === 'all' ? total : Math.min(60, total);
+    const targetCount = config.section === 'all' ? total : Math.min(60, total);
+    document.getElementById('sum-qcount').innerText = targetCount;
   }
 
   document.addEventListener('DOMContentLoaded', updateCounters);
 
-  function selectSection(el, val) {
-    document.querySelectorAll('[name="sec"]').forEach(i => i.parentNode.classList.remove('selected'));
-    el.classList.add('selected');
+  function selectSection(val) {
     config.section = val;
+    document.getElementById('opt-sec-all').classList.toggle('selected', val === 'all');
+    document.getElementById('opt-sec-60').classList.toggle('selected', val === 'random60');
+    document.getElementById('rad-sec-all').checked = (val === 'all');
+    document.getElementById('rad-sec-60').checked = (val === 'random60');
     updateCounters();
   }
 
-  function selectMode(el, val) {
-    document.querySelectorAll('[name="mode"]').forEach(i => i.parentNode.classList.remove('selected'));
-    el.classList.add('selected');
+  function selectMode(val) {
     config.mode = val;
+    document.getElementById('opt-mode-prac').classList.toggle('selected', val === 'practice');
+    document.getElementById('opt-mode-real').classList.toggle('selected', val === 'exam');
+    document.getElementById('rad-mode-prac').checked = (val === 'practice');
+    document.getElementById('rad-mode-real').checked = (val === 'exam');
     document.getElementById('sum-mode').innerText = val === 'practice' ? 'Práctica' : 'Realista';
   }
 
   function startQuiz() {
     if (typeof rawQuestions === 'undefined' || rawQuestions.length === 0) {
-      alert("No se cargaron las preguntas. Asegúrate de guardar el archivo questions.js.");
+      alert("No se cargaron las preguntas del archivo questions.js");
       return;
     }
     config.shuffleQ = document.getElementById('chk-shuffle-q').checked;
@@ -247,7 +256,6 @@
     }
 
     document.getElementById('q-explanation').style.display = 'none';
-    
     const btnAction = document.getElementById('btn-main-action');
     btnAction.innerText = config.mode === 'practice' ? "Comprobar respuesta" : "Guardar y Siguiente →";
 
@@ -256,7 +264,6 @@
 
     const container = document.getElementById('q-options');
     container.innerHTML = '';
-
     const isMultiple = q.answers.length > 1;
 
     opts.forEach((opt) => {
@@ -295,7 +302,7 @@
 
     const selectedInputs = document.querySelectorAll('input[name="opt-choice"]:checked');
     if (selectedInputs.length === 0) {
-      alert("Por favor selecciona al menos una respuesta.");
+      alert("Por favor selecciona una respuesta.");
       return;
     }
 
