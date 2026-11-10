@@ -66,7 +66,6 @@
     .btn-start { width: 100%; background: var(--accent-btn); color: #000; border: none; padding: 16px; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
     .btn-start:hover { background: #e2e8f0; }
 
-    /* Pantalla del examen */
     #quiz-screen, #result-screen { display: none; }
     .top-stats { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; background: var(--bg-card); padding: 12px 18px; border-radius: 10px; border: 1px solid var(--border); }
     .q-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
@@ -86,10 +85,8 @@
     .opt-item.incorrect { background: var(--incorrect-bg); border-color: var(--incorrect); color: #f87171; }
     
     .explanation-box { margin-top: 16px; padding: 14px; background: #0f172a; border-left: 4px solid var(--accent); border-radius: 6px; font-size: 0.88rem; line-height: 1.5; display: none; }
-    .nav-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; gap: 10px; }
-    .btn-action { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main); padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-action:hover { border-color: var(--accent); }
-    .btn-submit { background: var(--accent); color: #000; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .nav-btns { display: flex; justify-content: flex-end; align-items: center; margin-top: 16px; gap: 10px; }
+    .btn-submit { background: var(--accent); color: #000; border: none; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; cursor: pointer; }
     .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
   </style>
 </head>
@@ -176,8 +173,7 @@
     </div>
 
     <div class="nav-btns">
-      <button class="btn-submit" id="btn-check" onclick="submitMultiAnswer()">Verificar respuesta</button>
-      <button class="btn-action" onclick="nextQuestion()" id="btn-next">Siguiente →</button>
+      <button class="btn-submit" id="btn-main-action" onclick="handleMainAction()">Comprobar respuesta</button>
     </div>
   </div>
 
@@ -193,7 +189,6 @@
   </div>
 </div>
 
-<!-- Carga externa del banco de preguntas -->
 <script src="questions.js"></script>
 
 <script>
@@ -201,28 +196,21 @@
   let currentIndex = 0;
   let score = 0;
   let config = { section: 'all', mode: 'practice', shuffleQ: true, shuffleO: true };
+  let isQuestionAnswered = false;
 
-  function initCounters() {
+  function updateCounters() {
     const total = typeof rawQuestions !== 'undefined' ? rawQuestions.length : 164;
-    const countDesc = document.getElementById('banco-count-desc');
-    const sumCount = document.getElementById('sum-qcount');
-    if (countDesc) countDesc.innerText = `Las ${total} preguntas`;
-    if (sumCount) sumCount.innerText = total;
+    document.getElementById('banco-count-desc').innerText = `${total} preguntas`;
+    document.getElementById('sum-qcount').innerText = config.section === 'all' ? total : Math.min(60, total);
   }
-  
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCounters);
-  } else {
-    initCounters();
-  }
+
+  document.addEventListener('DOMContentLoaded', updateCounters);
 
   function selectSection(el, val) {
     document.querySelectorAll('[name="sec"]').forEach(i => i.parentNode.classList.remove('selected'));
     el.classList.add('selected');
     config.section = val;
-    const total = typeof rawQuestions !== 'undefined' ? rawQuestions.length : 164;
-    const count = val === 'all' ? total : Math.min(60, total);
-    document.getElementById('sum-qcount').innerText = count;
+    updateCounters();
   }
 
   function selectMode(el, val) {
@@ -234,13 +222,11 @@
 
   function startQuiz() {
     if (typeof rawQuestions === 'undefined' || rawQuestions.length === 0) {
-      alert("Error: No se encontró el archivo questions.js con las preguntas.");
+      alert("No se cargaron las preguntas. Asegúrate de tener el archivo questions.js en la misma carpeta.");
       return;
     }
-    const chkQ = document.getElementById('chk-shuffle-q');
-    const chkO = document.getElementById('chk-shuffle-o');
-    config.shuffleQ = chkQ ? chkQ.checked : true;
-    config.shuffleO = chkO ? chkO.checked : true;
+    config.shuffleQ = document.getElementById('chk-shuffle-q').checked;
+    config.shuffleO = document.getElementById('chk-shuffle-o').checked;
 
     currentQuestions = [...rawQuestions];
     if (config.shuffleQ) currentQuestions.sort(() => Math.random() - 0.5);
@@ -254,6 +240,7 @@
   }
 
   function showQuestion() {
+    isQuestionAnswered = false;
     const q = currentQuestions[currentIndex];
     document.getElementById('q-curr').innerText = currentIndex + 1;
     document.getElementById('q-title').innerText = `${currentIndex + 1}. ${q.question}`;
@@ -269,11 +256,9 @@
 
     document.getElementById('q-explanation').style.display = 'none';
     
-    const btnCheck = document.getElementById('btn-check');
-    if (btnCheck) {
-      btnCheck.disabled = false;
-      btnCheck.style.display = 'inline-block';
-    }
+    const btnAction = document.getElementById('btn-main-action');
+    btnAction.innerText = config.mode === 'practice' ? "Comprobar respuesta" : "Guardar y Siguiente →";
+    btnAction.disabled = false;
 
     let opts = [...q.options];
     if (config.shuffleO) opts.sort(() => Math.random() - 0.5);
@@ -286,63 +271,81 @@
     opts.forEach((opt) => {
       const label = document.createElement('label');
       label.className = 'opt-item';
-      
       const inputType = isMultiple ? 'checkbox' : 'radio';
+      
       label.innerHTML = `
-        <input type="${inputType}" name="opt-choice" value="${opt}">
+        <input type="${inputType}" name="opt-choice" value="${opt.replace(/"/g, '&quot;')}">
         <span>${opt}</span>
       `;
 
-      if (!isMultiple) {
-        label.onclick = (e) => {
-          if(e.target.tagName !== 'INPUT') {
-            const input = label.querySelector('input');
+      // Permitir seleccionar/cambiar la opción al hacer clic en cualquier parte de la fila
+      label.onclick = (e) => {
+        if (isQuestionAnswered) return;
+        const input = label.querySelector('input');
+        if (e.target !== input) {
+          if (inputType === 'radio') {
             input.checked = true;
+          } else {
+            input.checked = !input.checked;
           }
-          submitMultiAnswer();
-        };
-      }
+        }
+      };
 
       container.appendChild(label);
     });
-
-    if (!isMultiple && btnCheck) {
-      btnCheck.style.display = 'none';
-    }
   }
 
-  function submitMultiAnswer() {
-    const q = currentQuestions[currentIndex];
-    const selectedInputs = document.querySelectorAll('input[name="opt-choice"]:checked');
-    if (selectedInputs.length === 0) return;
+  function handleMainAction() {
+    const btnAction = document.getElementById('btn-main-action');
 
+    // Si ya respondieron en modo práctica, presionar el botón avanza a la siguiente pregunta
+    if (isQuestionAnswered) {
+      nextQuestion();
+      return;
+    }
+
+    const selectedInputs = document.querySelectorAll('input[name="opt-choice"]:checked');
+    if (selectedInputs.length === 0) {
+      alert("Por favor selecciona al menos una respuesta.");
+      return;
+    }
+
+    const q = currentQuestions[currentIndex];
     const selectedValues = Array.from(selectedInputs).map(i => i.value);
     const allLabels = document.querySelectorAll('.opt-item');
-    
-    document.querySelectorAll('input[name="opt-choice"]').forEach(i => i.disabled = true);
-    const btnCheck = document.getElementById('btn-check');
-    if (btnCheck) btnCheck.disabled = true;
 
+    // Comparación exacta sin importar el orden
     const isCorrect = selectedValues.length === q.answers.length && 
                       selectedValues.every(val => q.answers.includes(val));
 
-    if (isCorrect) {
-      score++;
-    }
-
-    allLabels.forEach(lbl => {
-      const val = lbl.querySelector('input').value;
-      if (q.answers.includes(val)) {
-        lbl.classList.add('correct');
-      } else if (selectedValues.includes(val)) {
-        lbl.classList.add('incorrect');
-      }
-    });
+    if (isCorrect) score++;
 
     if (config.mode === 'practice') {
+      isQuestionAnswered = true;
+      
+      // Bloquear cambios de opciones
+      document.querySelectorAll('input[name="opt-choice"]').forEach(i => i.disabled = true);
+
+      // Pintar las respuestas de color
+      allLabels.forEach(lbl => {
+        const val = lbl.querySelector('input').value;
+        if (q.answers.includes(val)) {
+          lbl.classList.add('correct');
+        } else if (selectedValues.includes(val)) {
+          lbl.classList.add('incorrect');
+        }
+      });
+
+      // Mostrar explicación
       const expBox = document.getElementById('q-explanation');
       expBox.innerHTML = `<strong>Explicación:</strong> ${q.explanation}`;
       expBox.style.display = 'block';
+
+      // Cambiar texto del botón para avanzar
+      btnAction.innerText = "Siguiente pregunta →";
+    } else {
+      // Modo realista: avanzar directamente
+      nextQuestion();
     }
   }
 
@@ -360,7 +363,7 @@
     document.getElementById('result-screen').style.display = 'block';
     document.getElementById('final-score').innerText = `${score} / ${currentQuestions.length}`;
     const pct = ((score / currentQuestions.length) * 100).toFixed(0);
-    document.getElementById('final-msg').innerText = pct >= 70 ? `¡Excelente trabajo! Aprobaste con un ${pct}%.` : `Obtuviste ${pct}%. Se recomienda repasar los temas de CCNA 1 antes de presentar la evaluación oficial.`;
+    document.getElementById('final-msg').innerText = pct >= 70 ? `¡Excelente trabajo! Aprobaste con un ${pct}%.` : `Obtuviste ${pct}%. Se recomienda repasar los temas antes de presentar la evaluación oficial.`;
   }
 </script>
 </body>
