@@ -4,10 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CCNA 1 v7.0 - Examen Final ITN (164 Preguntas)</title>
-  
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0b0f19">
 
   <style>
@@ -71,10 +69,8 @@
     .q-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
     .q-text { font-size: 1.05rem; font-weight: 600; line-height: 1.5; margin-bottom: 16px; }
     
-    .q-image-container { background: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 20px; text-align: center; overflow-x: auto; }
-    .q-image-container table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
-    .q-image-container th, .q-image-container td { border: 1px solid var(--border); padding: 8px; text-align: left; }
-    .q-image-container th { background: #1e293b; color: var(--accent); }
+    .q-image-container { background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center; overflow-x: auto; }
+    .q-image-container img { max-width: 100%; height: auto; border-radius: 4px; display: block; margin: 0 auto; }
 
     .options-list { display: flex; flex-direction: column; gap: 10px; }
     .opt-item { background: #0b0f19; border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: left; color: var(--text-main); font-size: 0.92rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
@@ -87,17 +83,15 @@
     .explanation-box { margin-top: 16px; padding: 14px; background: #0f172a; border-left: 4px solid var(--accent); border-radius: 6px; font-size: 0.88rem; line-height: 1.5; display: none; }
     .nav-btns { display: flex; justify-content: flex-end; align-items: center; margin-top: 16px; gap: 10px; }
     .btn-submit { background: var(--accent); color: #000; border: none; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 0.95rem; cursor: pointer; }
-    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- Configuración -->
   <div id="config-screen">
     <div class="header-badge">Cisco NetAcad • CCNA 1 v7.0 (ITN)</div>
     <h1>Examen Final del Curso</h1>
-    <p class="description">Simulador oficial interactivo con 164 preguntas, imágenes de topologías de red, tablas de coincidencia y explicaciones detalladas.</p>
+    <p class="description">Simulador oficial interactivo con las 164 preguntas e imágenes originales del examen final.</p>
 
     <div class="section-box">
       <div class="section-title"><span>01</span> Sección del cuestionario</div>
@@ -105,7 +99,7 @@
         <div class="card-opt selected" onclick="selectSection(this, 'all')">
           <input type="radio" name="sec" checked>
           <h3>Banco completo</h3>
-          <p id="banco-count-desc">164 preguntas</p>
+          <p id="banco-count-desc">Cargando preguntas...</p>
         </div>
         <div class="card-opt" onclick="selectSection(this, 'random60')">
           <input type="radio" name="sec">
@@ -150,7 +144,7 @@
     </div>
 
     <div class="summary-bar">
-      <div class="sum-card"><label>Preguntas</label><div id="sum-qcount">164</div></div>
+      <div class="sum-card"><label>Preguntas</label><div id="sum-qcount">--</div></div>
       <div class="sum-card"><label>Modo</label><div id="sum-mode">Práctica</div></div>
       <div class="sum-card"><label>Vidas</label><div>Sin límite</div></div>
     </div>
@@ -158,10 +152,9 @@
     <button class="btn-start" onclick="startQuiz()">Comenzar examen →</button>
   </div>
 
-  <!-- Examen -->
   <div id="quiz-screen">
     <div class="top-stats">
-      <div>Pregunta <span id="q-curr">1</span> de <span id="q-total">164</span></div>
+      <div>Pregunta <span id="q-curr">1</span> de <span id="q-total">--</span></div>
       <div id="timer-display">Tiempo Libre</div>
     </div>
 
@@ -177,7 +170,6 @@
     </div>
   </div>
 
-  <!-- Resultados -->
   <div id="result-screen">
     <div class="section-box" style="text-align: center; padding: 40px;">
       <h2>Examen Finalizado</h2>
@@ -199,8 +191,8 @@
   let isQuestionAnswered = false;
 
   function updateCounters() {
-    const total = typeof rawQuestions !== 'undefined' ? rawQuestions.length : 164;
-    document.getElementById('banco-count-desc').innerText = `${total} preguntas`;
+    const total = typeof rawQuestions !== 'undefined' ? rawQuestions.length : 0;
+    document.getElementById('banco-count-desc').innerText = `${total} preguntas cargadas`;
     document.getElementById('sum-qcount').innerText = config.section === 'all' ? total : Math.min(60, total);
   }
 
@@ -222,7 +214,7 @@
 
   function startQuiz() {
     if (typeof rawQuestions === 'undefined' || rawQuestions.length === 0) {
-      alert("No se cargaron las preguntas. Asegúrate de tener el archivo questions.js en la misma carpeta.");
+      alert("No se cargaron las preguntas. Asegúrate de guardar el archivo questions.js.");
       return;
     }
     config.shuffleQ = document.getElementById('chk-shuffle-q').checked;
@@ -258,7 +250,6 @@
     
     const btnAction = document.getElementById('btn-main-action');
     btnAction.innerText = config.mode === 'practice' ? "Comprobar respuesta" : "Guardar y Siguiente →";
-    btnAction.disabled = false;
 
     let opts = [...q.options];
     if (config.shuffleO) opts.sort(() => Math.random() - 0.5);
@@ -278,7 +269,6 @@
         <span>${opt}</span>
       `;
 
-      // Permitir seleccionar/cambiar la opción al hacer clic en cualquier parte de la fila
       label.onclick = (e) => {
         if (isQuestionAnswered) return;
         const input = label.querySelector('input');
@@ -298,7 +288,6 @@
   function handleMainAction() {
     const btnAction = document.getElementById('btn-main-action');
 
-    // Si ya respondieron en modo práctica, presionar el botón avanza a la siguiente pregunta
     if (isQuestionAnswered) {
       nextQuestion();
       return;
@@ -314,7 +303,6 @@
     const selectedValues = Array.from(selectedInputs).map(i => i.value);
     const allLabels = document.querySelectorAll('.opt-item');
 
-    // Comparación exacta sin importar el orden
     const isCorrect = selectedValues.length === q.answers.length && 
                       selectedValues.every(val => q.answers.includes(val));
 
@@ -322,11 +310,8 @@
 
     if (config.mode === 'practice') {
       isQuestionAnswered = true;
-      
-      // Bloquear cambios de opciones
       document.querySelectorAll('input[name="opt-choice"]').forEach(i => i.disabled = true);
 
-      // Pintar las respuestas de color
       allLabels.forEach(lbl => {
         const val = lbl.querySelector('input').value;
         if (q.answers.includes(val)) {
@@ -336,15 +321,12 @@
         }
       });
 
-      // Mostrar explicación
       const expBox = document.getElementById('q-explanation');
       expBox.innerHTML = `<strong>Explicación:</strong> ${q.explanation}`;
       expBox.style.display = 'block';
 
-      // Cambiar texto del botón para avanzar
       btnAction.innerText = "Siguiente pregunta →";
     } else {
-      // Modo realista: avanzar directamente
       nextQuestion();
     }
   }
