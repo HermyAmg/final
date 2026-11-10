@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CCNA 1 v7.0 - Examen Final ITN (164 Preguntas)</title>
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0b0f19">
+
+  <style>
+    :root {
+      --bg-main: #0b0f19;
+      --bg-card: #111827;
+      --border: #1f2937;
+      --border-active: #38bdf8;
+      --accent: #38bdf8;
+      --accent-btn: #f8fafc;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --correct: #22c55e;
+      --correct-bg: rgba(34, 197, 94, 0.15);
+      --incorrect: #ef4444;
+      --incorrect-bg: rgba(239, 68, 68, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-main); color: var(--text-main); display: flex; justify-content: center; padding: 30px 15px; min-height: 100vh; }
+    .container { max-width: 800px; width: 100%; }
+
+    .header-badge { color: var(--accent); font-size: 0.75rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; }
+    h1 { font-size: 2rem; font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
+    p.description { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 24px; }
+
+    .section-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .section-title { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .section-title span { color: var(--accent); }
+
+    .grid-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .card-opt { background: #0b0f19; border: 1px solid var(--border); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s; position: relative; }
+    .card-opt:hover { border-color: #374151; }
+    .card-opt.selected { border-color: var(--border-active); background: #0f172a; }
+    .card-opt input { position: absolute; top: 16px; right: 16px; accent-color: var(--accent); }
+    .card-opt h3 { font-size: 0.95rem; margin-bottom: 4px; }
+    .card-opt p { font-size: 0.8rem; color: var(--text-muted); }
+
+    .switch-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #1e293b; }
+    .switch-row:last-child { border-bottom: none; }
+    .switch-info h4 { font-size: 0.9rem; margin-bottom: 2px; }
+    .switch-info p { font-size: 0.78rem; color: var(--text-muted); }
+
+    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+    input:checked + .slider { background-color: var(--accent); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    .summary-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+    .sum-card { flex: 1; background: var(--bg-card); border: 1px solid var(--border); padding: 14px; border-radius: 10px; text-align: center; }
+    .sum-card label { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px; }
+    .sum-card div { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+
+    .btn-start { width: 100%; background: var(--accent-btn); color: #000; border: none; padding: 16px; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    .btn-start:hover { background: #e2e8f0; }
+
+    /* Pantalla del examen */
+    #quiz-screen, #result-screen { display: none; }
+    .top-stats { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; background: var(--bg-card); padding: 12px 18px; border-radius: 10px; border: 1px solid var(--border); }
+    .q-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .q-text { font-size: 1.05rem; font-weight: 600; line-height: 1.5; margin-bottom: 16px; }
+    
+    .q-image-container { background: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 20px; text-align: center; overflow-x: auto; }
+    .q-image-container table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
+    .q-image-container th, .q-image-container td { border: 1px solid var(--border); padding: 8px; text-align: left; }
+    .q-image-container th { background: #1e293b; color: var(--accent); }
+
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .opt-item { background: #0b0f19; border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: left; color: var(--text-main); font-size: 0.92rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
+    .opt-item:hover { border-color: var(--accent); }
+    .opt-item input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+    
+    .opt-item.correct { background: var(--correct-bg); border-color: var(--correct); color: #4ade80; }
+    .opt-item.incorrect { background: var(--incorrect-bg); border-color: var(--incorrect); color: #f87171; }
+    
+    .explanation-box { margin-top: 16px; padding: 14px; background: #0f172a; border-left: 4px solid var(--accent); border-radius: 6px; font-size: 0.88rem; line-height: 1.5; display: none; }
+    .nav-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; gap: 10px; }
+    .btn-action { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main); padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-action:hover { border-color: var(--accent); }
+    .btn-submit { background: var(--accent); color: #000; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Configuración -->
+  <div id="config-screen">
+    <div class="header-badge">Cisco NetAcad • CCNA 1 v7.0 (ITN)</div>
+    <h1>Examen Final del Curso</h1>
+    <p class="description">Simulador oficial interactivo con 164 preguntas, imágenes de topologías de red, tablas de coincidencia y explicaciones detalladas.</p>
+
+    <div class="section-box">
+      <div class="section-title"><span>01</span> Sección del cuestionario</div>
+      <div class="grid-options">
+        <div class="card-opt selected" onclick="selectSection(this, 'all')">
+          <input type="radio" name="sec" checked>
+          <h3>Banco completo</h3>
+          <p id="banco-count-desc">164 preguntas</p>
+        </div>
+        <div class="card-opt" onclick="selectSection(this, 'random60')">
+          <input type="radio" name="sec">
+          <h3>Simulacro aleatorio</h3>
+          <p>60 preguntas al azar</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-box">
+      <div class="section-title"><span>02</span> Modo de evaluación</div>
+      <div class="grid-options">
+        <div class="card-opt selected" onclick="selectMode(this, 'practice')">
+          <input type="radio" name="mode" checked>
+          <h3>Práctica</h3>
+          <p>Verifica cada respuesta y lee la explicación al instante.</p>
+        </div>
+        <div class="card-opt" onclick="selectMode(this, 'exam')">
+          <input type="radio" name="mode">
+          <h3>Realista</h3>
+          <p>Sin retroalimentación: las respuestas se guardan hasta finalizar.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-box">
+      <div class="section-title"><span>03</span> Desafíos opcionales</div>
+      <div class="switch-row">
+        <div class="switch-info">
+          <h4>Preguntas en orden aleatorio</h4>
+          <p>Cambia el orden de las preguntas en cada intento.</p>
+        </div>
+        <label class="toggle"><input type="checkbox" id="chk-shuffle-q" checked><span class="slider"></span></label>
+      </div>
+      <div class="switch-row">
+        <div class="switch-info">
+          <h4>Opciones en orden aleatorio</h4>
+          <p>Mezcla las respuestas de cada pregunta.</p>
+        </div>
+        <label class="toggle"><input type="checkbox" id="chk-shuffle-o" checked><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="summary-bar">
+      <div class="sum-card"><label>Preguntas</label><div id="sum-qcount">164</div></div>
+      <div class="sum-card"><label>Modo</label><div id="sum-mode">Práctica</div></div>
+      <div class="sum-card"><label>Vidas</label><div>Sin límite</div></div>
+    </div>
+
+    <button class="btn-start" onclick="startQuiz()">Comenzar examen →</button>
+  </div>
+
+  <!-- Examen -->
+  <div id="quiz-screen">
+    <div class="top-stats">
+      <div>Pregunta <span id="q-curr">1</span> de <span id="q-total">164</span></div>
+      <div id="timer-display">Tiempo Libre</div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-text" id="q-title">Cargando...</div>
+      <div id="q-image-box" class="q-image-container" style="display: none;"></div>
+      <div class="options-list" id="q-options"></div>
+      <div class="explanation-box" id="q-explanation"></div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-submit" id="btn-check" onclick="submitMultiAnswer()">Verificar respuesta</button>
+      <button class="btn-action" onclick="nextQuestion()" id="btn-next">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- Resultados -->
+  <div id="result-screen">
+    <div class="section-box" style="text-align: center; padding: 40px;">
+      <h2>Examen Finalizado</h2>
+      <p class="description">Este es tu resultado final según las respuestas registradas:</p>
+      <div style="font-size: 3.5rem; font-weight: 800; color: var(--accent); margin: 20px 0;" id="final-score">0 / 0</div>
+      <p id="final-msg" style="margin-bottom: 24px;"></p>
+      <button class="btn-start" onclick="location.reload()">Volver a intentar ↻</button>
+    </div>
+  </div>
+</div>
+
+<!-- Carga externa del banco de preguntas -->
+<script src="questions.js"></script>
+
+<script>
+  let currentQuestions = [];
+  let currentIndex = 0;
+  let score = 0;
+  let config = { section: 'all', mode: 'practice', shuffleQ: true, shuffleO: true };
+
+  function initCounters() {
+    const total = typeof rawQuestions !== 'undefined' ? rawQuestions.length : 164;
+    const countDesc = document.getElementById('banco-count-desc');
+    const sumCount = document.getElementById('sum-qcount');
+    if (countDesc) countDesc.innerText = `Las ${total} preguntas`;
+    if (sumCount) sumCount.innerText = total;
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCounters);
+  } else {
+    initCounters();
+  }
+
+  function selectSection(el, val) {
+    document.querySelectorAll('[name="sec"]').forEach(i => i.parentNode.classList.remove('selected'));
+    el.classList.add('selected');
+    config.section = val;
+    const total = typeof rawQuestions !== 'undefined' ? rawQuestions.length : 164;
+    const count = val === 'all' ? total : Math.min(60, total);
+    document.getElementById('sum-qcount').innerText = count;
+  }
+
+  function selectMode(el, val) {
+    document.querySelectorAll('[name="mode"]').forEach(i => i.parentNode.classList.remove('selected'));
+    el.classList.add('selected');
+    config.mode = val;
+    document.getElementById('sum-mode').innerText = val === 'practice' ? 'Práctica' : 'Realista';
+  }
+
+  function startQuiz() {
+    if (typeof rawQuestions === 'undefined' || rawQuestions.length === 0) {
+      alert("Error: No se encontró el archivo questions.js con las preguntas.");
+      return;
+    }
+    const chkQ = document.getElementById('chk-shuffle-q');
+    const chkO = document.getElementById('chk-shuffle-o');
+    config.shuffleQ = chkQ ? chkQ.checked : true;
+    config.shuffleO = chkO ? chkO.checked : true;
+
+    currentQuestions = [...rawQuestions];
+    if (config.shuffleQ) currentQuestions.sort(() => Math.random() - 0.5);
+    if (config.section === 'random60') currentQuestions = currentQuestions.slice(0, Math.min(60, currentQuestions.length));
+
+    document.getElementById('config-screen').style.display = 'none';
+    document.getElementById('quiz-screen').style.display = 'block';
+    document.getElementById('q-total').innerText = currentQuestions.length;
+
+    showQuestion();
+  }
+
+  function showQuestion() {
+    const q = currentQuestions[currentIndex];
+    document.getElementById('q-curr').innerText = currentIndex + 1;
+    document.getElementById('q-title').innerText = `${currentIndex + 1}. ${q.question}`;
+    
+    const imgBox = document.getElementById('q-image-box');
+    if (q.imageHtml) {
+      imgBox.innerHTML = q.imageHtml;
+      imgBox.style.display = 'block';
+    } else {
+      imgBox.style.display = 'none';
+      imgBox.innerHTML = '';
+    }
+
+    document.getElementById('q-explanation').style.display = 'none';
+    
+    const btnCheck = document.getElementById('btn-check');
+    if (btnCheck) {
+      btnCheck.disabled = false;
+      btnCheck.style.display = 'inline-block';
+    }
+
+    let opts = [...q.options];
+    if (config.shuffleO) opts.sort(() => Math.random() - 0.5);
+
+    const container = document.getElementById('q-options');
+    container.innerHTML = '';
+
+    const isMultiple = q.answers.length > 1;
+
+    opts.forEach((opt) => {
+      const label = document.createElement('label');
+      label.className = 'opt-item';
+      
+      const inputType = isMultiple ? 'checkbox' : 'radio';
+      label.innerHTML = `
+        <input type="${inputType}" name="opt-choice" value="${opt}">
+        <span>${opt}</span>
+      `;
+
+      if (!isMultiple) {
+        label.onclick = (e) => {
+          if(e.target.tagName !== 'INPUT') {
+            const input = label.querySelector('input');
+            input.checked = true;
+          }
+          submitMultiAnswer();
+        };
+      }
+
+      container.appendChild(label);
+    });
+
+    if (!isMultiple && btnCheck) {
+      btnCheck.style.display = 'none';
+    }
+  }
+
+  function submitMultiAnswer() {
+    const q = currentQuestions[currentIndex];
+    const selectedInputs = document.querySelectorAll('input[name="opt-choice"]:checked');
+    if (selectedInputs.length === 0) return;
+
+    const selectedValues = Array.from(selectedInputs).map(i => i.value);
+    const allLabels = document.querySelectorAll('.opt-item');
+    
+    document.querySelectorAll('input[name="opt-choice"]').forEach(i => i.disabled = true);
+    const btnCheck = document.getElementById('btn-check');
+    if (btnCheck) btnCheck.disabled = true;
+
+    const isCorrect = selectedValues.length === q.answers.length && 
+                      selectedValues.every(val => q.answers.includes(val));
+
+    if (isCorrect) {
+      score++;
+    }
+
+    allLabels.forEach(lbl => {
+      const val = lbl.querySelector('input').value;
+      if (q.answers.includes(val)) {
+        lbl.classList.add('correct');
+      } else if (selectedValues.includes(val)) {
+        lbl.classList.add('incorrect');
+      }
+    });
+
+    if (config.mode === 'practice') {
+      const expBox = document.getElementById('q-explanation');
+      expBox.innerHTML = `<strong>Explicación:</strong> ${q.explanation}`;
+      expBox.style.display = 'block';
+    }
+  }
+
+  function nextQuestion() {
+    if (currentIndex < currentQuestions.length - 1) {
+      currentIndex++;
+      showQuestion();
+    } else {
+      showResults();
+    }
+  }
+
+  function showResults() {
+    document.getElementById('quiz-screen').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    document.getElementById('final-score').innerText = `${score} / ${currentQuestions.length}`;
+    const pct = ((score / currentQuestions.length) * 100).toFixed(0);
+    document.getElementById('final-msg').innerText = pct >= 70 ? `¡Excelente trabajo! Aprobaste con un ${pct}%.` : `Obtuviste ${pct}%. Se recomienda repasar los temas de CCNA 1 antes de presentar la evaluación oficial.`;
+  }
+</script>
+</body>
+</html>
